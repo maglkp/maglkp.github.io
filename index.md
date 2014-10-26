@@ -5,6 +5,8 @@ Activity correctness prediction model based on HAR data on weight lifting
 ## Summary
 Human Activity Recognition (HAR) is an emerging area of research that deals with gathering and processing data on physical activity of people. One of the interesting applications is building a model for predicting the correctness of executions of weight lifting excercises by professionals and non professionals. Here a dataset available at http://groupware.les.inf.puc-rio.br/har is used to create such a model using random forest algorithm. The analysis shows that the model can be successful on test and cross validation data and can achieve high accuracy.
 
+## Exploring the data set
+
 As a first step let's load the data from two files "pml-training.csv" and "pml-testing.csv". 
 The data in the first file contains 19622 rows, each row is labeled A-E (variable "classe") with A indicating correct execution of an exercise and other cases indicating 4 typical exercise errors. This data set will be split into training and test set with 70% used for training.
 
@@ -45,6 +47,8 @@ set.seed(1010)
 activityData <- read.csv("pml-training.csv")
 activityCrossValidation <- read.csv("pml-testing.csv")
 ```
+
+## Cleaning the data and preparing covariates
 
 The first step of the analysis after forming a specific question that the model is to answer is the exploring the data and gaining insights on how to process it and how to form covariates. For brevity only the outlines of the steps taken are described here. We can see that the data consists of the whopping 160 columns. First we want to discard columns not containing measurements from one of the 4 sensors so we want to discard columns not containing "_arm", "_forearm", "_belt", "_dumbbell" or the outcome "classe". This leaves us with 152 colums (38 variables for each of the sensor).  
 
@@ -97,7 +101,10 @@ preProcess(training[,1:52], method="pca")
 ## PCA needed 25 components to capture 95 percent of the variance
 ```
 
-As we can see PCA using the default threshold of 95% of variance gives very satisfactory results reducing the number of covariates to 25 so less than half of the original number. Since the model used is random forest no further refinements on the data is needed. That is, the final accuracy and robustness can surely be improved further by including additional preparation steps but is not needed to get really decent results in this particular case. Below is a code snippet that will perform the training and present the final model.
+As we can see PCA using the default threshold of 95% of variance gives very satisfactory results reducing the number of covariates to 25 so less than half of the original number. Since the model used is random forest no further refinements on the data is needed. That is, the final accuracy and robustness can surely be improved further by including additional preparation steps but is not needed to get really decent results in this particular case. 
+
+## Training the model
+Below is a code snippet that will perform the training and present the final model.
 
 
 ```r
@@ -193,8 +200,10 @@ modelRf$finalModel
 ```
 
 In the listing above we see that the out of bag (OOB) estimate is equal to 2.39%
-Let's apply the model to the testing set and see how well it is doing.
 
+## Cross validation test and final results
+
+Let's apply the model to the testing set and see how well it is doing.  
 
 ```r
 confusionMatrix(testing$classe, predict(modelRf, testing))
